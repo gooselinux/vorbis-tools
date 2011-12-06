@@ -1,0 +1,29 @@
+diff -rup vorbis-tools-1.2.0.orig/oggenc/oggenc.c vorbis-tools-1.2.0/oggenc/oggenc.c
+--- vorbis-tools-1.2.0.orig/oggenc/oggenc.c	2008-03-03 06:37:27.000000000 +0100
++++ vorbis-tools-1.2.0/oggenc/oggenc.c	2009-10-06 21:27:09.398047466 +0200
+@@ -147,6 +147,7 @@ int main(int argc, char **argv)
+         char *artist=NULL, *album=NULL, *title=NULL, *track=NULL;
+         char *date=NULL, *genre=NULL;
+         input_format *format;
++        int resampled = 0;
+ 
+         /* Set various encoding defaults */
+ 
+@@ -324,6 +325,8 @@ int main(int argc, char **argv)
+ 
+         if(opt.resamplefreq && opt.resamplefreq != enc_opts.rate) {
+             int fromrate = enc_opts.rate;
++
++            resampled = 1;
+             enc_opts.resamplefreq = opt.resamplefreq;
+             if(setup_resample(&enc_opts)) {
+                 errors++;
+@@ -369,7 +372,7 @@ int main(int argc, char **argv)
+             clear_scaler(&enc_opts);
+         if(opt.downmix)
+             clear_downmix(&enc_opts);
+-        if(opt.resamplefreq && opt.resamplefreq != enc_opts.rate)
++        if(resampled)
+             clear_resample(&enc_opts);
+ clear_all:
+ 

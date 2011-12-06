@@ -1,0 +1,45 @@
+diff -up vorbis-tools-1.2.0/ogg123/ogg123.c.non-block vorbis-tools-1.2.0/ogg123/ogg123.c
+--- vorbis-tools-1.2.0/ogg123/ogg123.c.non-block	2008-03-03 06:37:26.000000000 +0100
++++ vorbis-tools-1.2.0/ogg123/ogg123.c	2008-10-16 10:35:12.000000000 +0200
+@@ -504,6 +504,7 @@ int main(int argc, char **argv)
+ 
+   }
+   playlist_array_destroy(playlist_array, items);
++  status_deinit();
+ 
+   exit (exit_status);
+ }
+diff -up vorbis-tools-1.2.0/ogg123/status.c.non-block vorbis-tools-1.2.0/ogg123/status.c
+--- vorbis-tools-1.2.0/ogg123/status.c.non-block	2008-03-03 06:37:26.000000000 +0100
++++ vorbis-tools-1.2.0/ogg123/status.c	2008-10-16 10:52:52.000000000 +0200
+@@ -324,12 +324,18 @@ void stat_format_cleanup (stat_format_t 
+ void status_init (int verbosity)
+ {
+ #if defined(HAVE_FCNTL) && defined(HAVE_UNISTD_H)
+-  fcntl (STDERR_FILENO, F_SETFL, O_NONBLOCK);
++  fcntl (STDERR_FILENO, F_SETFL, fcntl(STDERR_FILENO, F_GETFL) | O_NONBLOCK);
+ #endif
+ 
+   max_verbosity = verbosity;
+ }
+ 
++void status_deinit ()
++{
++#if defined(HAVE_FCNTL) && defined(HAVE_UNISTD_H)
++  fcntl (STDERR_FILENO, F_SETFL, fcntl(STDERR_FILENO, F_GETFL) & ~O_NONBLOCK);
++#endif
++}
+ 
+ void status_reset_output_lock ()
+ {
+diff -up vorbis-tools-1.2.0/ogg123/status.h.non-block vorbis-tools-1.2.0/ogg123/status.h
+--- vorbis-tools-1.2.0/ogg123/status.h.non-block	2008-03-03 06:37:26.000000000 +0100
++++ vorbis-tools-1.2.0/ogg123/status.h	2008-10-16 10:34:43.000000000 +0200
+@@ -60,6 +60,7 @@ stat_format_t *stat_format_create ();
+ void stat_format_cleanup (stat_format_t *stats);
+ 
+ void status_init (int verbosity);
++void status_deinit ();
+ void status_reset_output_lock ();
+ void status_clear_line ();
+ void status_print_statistics (stat_format_t *stats,
